@@ -45,13 +45,16 @@ java {
 
 
 def entityType = 'D'
-def version = System.getenv("ADEMPIERE_LIBRARY_VERSION") ?: "local-1.0.0"
+group = "io.github.adempiere"
+version = System.getenv("ADEMPIERE_LIBRARY_VERSION") ?: "local-1.0.0"
 
 jar {
-    manifest {
-        attributes("Implementation-Title": "Adempiere Template Management",
-                   "Implementation-Version": version, 
-                   "EntityType": entityType)
+	manifest {
+		attributes(
+			"Implementation-Title": "ADempiere Template Management",
+			"Implementation-Version": version,
+			"EntityType": entityType
+		)
     }
 }
 
@@ -69,9 +72,9 @@ publishing {
     }
     publications {
         mavenJava(MavenPublication) {
-        	groupId 'io.github.adempiere'
-            artifactId 'adempiere-template-project'
-            version
+			groupId = group
+			artifactId = 'adempiere-template-project'
+			version = version
            	from components.java
            	pom {
                 name = 'ADempiere Template Project'
@@ -100,6 +103,12 @@ publishing {
 	}
 }
 
+
+task cleanBuildPublishLocal(type: GradleBuild) {
+	tasks = ['clean', 'build', 'publishToMavenLocal']
+}
+
+
 signing {
 	def isReleaseVersion = !version.toString().startsWith("local") && !version.toString().endsWith("-SNAPSHOT")
 
@@ -108,7 +117,7 @@ signing {
 	setRequired {
 		// signing is required if this is a release version and the artifacts are to be published
 		// do not use hasTask() as this require realization of the tasks that maybe are not necessary
-		isReleaseVersion && gradle.taskGraph.allTasks.any {
+		(isReleaseVersion || version.toString().equals("build")) && gradle.taskGraph.allTasks.any {
 			it.equals(PublishToMavenRepository)
 		}
 	}
